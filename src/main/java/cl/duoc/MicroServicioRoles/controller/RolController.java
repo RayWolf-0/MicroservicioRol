@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cl.duoc.MicroServicioRoles.Assembler.RolAssembler;
 import cl.duoc.MicroServicioRoles.entity.Rol;
 import cl.duoc.MicroServicioRoles.service.RolService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,8 @@ public class RolController {
 
     @Autowired
     private RolService rolService;
+    @Autowired
+    private RolAssembler asembler;
 
     //endpoint para listar los roles
     @GetMapping
@@ -47,7 +50,7 @@ public class RolController {
     public ResponseEntity<?> obtenerRoles() {
         try {
             List<Rol> roles = rolService.obtenerRoles();
-            return ResponseEntity.ok(roles);
+            return ResponseEntity.ok(asembler.toCollectionModel(roles));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al obtener roles: " + e.getMessage());
         }
@@ -71,7 +74,7 @@ public class RolController {
         try {
             Rol rol = rolService.obtenerPorId(id);
             return rol != null
-                    ? ResponseEntity.ok(rol)
+                    ? ResponseEntity.ok(asembler.toModel(rol))
                     : ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al buscar el rol: " + e.getMessage());
@@ -120,7 +123,7 @@ public class RolController {
             if (rolExistente != null) {
                 rolActualizado.setIdRol(id);
                 Rol actualizado = rolService.guardarRol(rolActualizado);
-                return ResponseEntity.ok(actualizado);
+                return ResponseEntity.ok(asembler.toModel(rolActualizado));
             } else {
                 return ResponseEntity.notFound().build();
             }
